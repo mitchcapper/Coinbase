@@ -78,7 +78,13 @@ namespace Coinbase.ObjectModel
         [JsonExtensionData]
         public IDictionary<string, JToken> ExtraData { get; set; }
     }
+	public class RequestPagination {
+		public SortOrder Order { get; set; }
+		public string StartingAfter { get; set; }
+		public string EndingBefore { get; set; }
+		public int Limit { get; set; }
 
+	}
     public class Pagination
     {
         [JsonProperty("ending_before")]
@@ -159,7 +165,8 @@ namespace Coinbase.ObjectModel
     public enum OrderType
     {
         Order,
-        Donation
+        Donation,
+		invoice
     }
 
     public enum OrderStyle
@@ -178,4 +185,47 @@ namespace Coinbase.ObjectModel
         public ulong Epoch { get; set; }
     }
 
+	public enum OrderStatus {
+		active,
+		pending,
+		paid,
+		expired,
+		mispaid
+	}
+	public class MoneyHash {
+		public decimal amount { get; set; }
+		public string currency { get; set; }
+	}
+	public class TransactionHash {
+		public string id { get; set; }
+		public string resource { get; set; }
+		public string resource_path { get; set; }
+	}
+	public class Order {
+		public string id { get; set; }
+		public string code { get; set; }
+		public OrderStatus status { get; set; }
+		public OrderType type { get; set; }
+		public string name { get; set; }
+		public string description { get; set; }
+		public MoneyHash amount { get; set; }
+		public MoneyHash payout_amount { get; set; }
+		public string bitcoint_address { get; set; }
+		public MoneyHash bitcoin_amount { get; set; }
+		public string bitcoin_uri { get; set; }
+		public string receipt_url { get; set; }
+		public DateTime? expires_at { get; set; }
+		public DateTime? mispaid_at { get; set; }
+		public DateTime? paid_at { get; set; }
+		public string refund_address { get; set; }
+		public TransactionHash transaction { get; set; }
+
+		public object[] refunds { get; set; }
+		public object[] mispayments { get; set; }
+		public Dictionary<string, object> metadata { get; set; } = new Dictionary<string, object>();
+		public DateTime created_at { get; set; }
+		public DateTime updated_at { get; set; }
+		public string resource { get; set; }
+		public string resource_path { get; set; }
+	}
 }

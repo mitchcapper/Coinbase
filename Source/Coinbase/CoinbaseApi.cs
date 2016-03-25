@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
 using Coinbase.ObjectModel;
@@ -155,24 +156,50 @@ namespace Coinbase
         {
             var client = CreateClient();
 
-            var req = CreateRequest(endpoint, httpMethod)
-                .AddJsonBody(body);
-            
+			var req = CreateRequest(endpoint, httpMethod).AddJsonBody(body);
+           
             var resp = client.Execute<CoinbaseResponse<TResponse>>(req);
 
             return resp.Data;
         }
+		public virtual CoinbaseResponse<TResponse> SendGetRequest<TResponse>(string endpoint, params KeyValuePair<string,string> [] query_params) {
+			var client = CreateClient();
 
-        /// <summary>
-        /// Creates a new merchant order checkout product.
-        /// All checkouts and subsequent orders created using this endpoint are created for merchant’s primary account.
-        /// Using this endpoint to create checkouts and orders is useful when you want to build a merchant checkout experience with Coinbase’s merchant tools.
-        /// </summary>
-        public virtual CoinbaseResponse CreateCheckout(CheckoutRequest checkout)
+			var req = CreateRequest(endpoint, Method.GET);
+			if (query_params != null) { 
+				
+				for (var i = 0; i < query_params.Length; i++)
+					req.AddQueryParameter(query_params[i].Key, query_params[i].Value);
+			}
+
+			var resp = client.Execute<CoinbaseResponse<TResponse>>(req);
+
+			return resp.Data;
+		}
+
+		/// <summary>
+		/// Creates a new merchant order checkout product.
+		/// All checkouts and subsequent orders created using this endpoint are created for merchant’s primary account.
+		/// Using this endpoint to create checkouts and orders is useful when you want to build a merchant checkout experience with Coinbase’s merchant tools.
+		/// </summary>
+		public virtual CoinbaseResponse CreateCheckout(CheckoutRequest checkout)
         {
             return SendRequest("checkouts", checkout);
         }
-
+		public virtual CoinbaseResponse<Order[]> ListOrders(RequestPagination pagination = null) {
+			var args = new List<KeyValuePair<string,string>>();
+			if (pagination != null) {
+				if (!String.IsNullOrWhiteSpace(pagination.EndingBefore))
+					args.Add(new KeyValuePair<string, string>("ending_before", pagination.EndingBefore));
+                if (pagination.Limit != 0)
+					args.Add(new KeyValuePair<string, string>("limit", pagination.Limit.ToString()));
+				if (pagination.Order == SortOrder.Asc)
+					args.Add(new KeyValuePair<string, string>("order", "asc"));
+				if (!String.IsNullOrWhiteSpace(pagination.StartingAfter))
+					args.Add(new KeyValuePair<string, string>("starting_after", pagination.StartingAfter));
+            }
+			return SendGetRequest<Order[]>("orders",args.ToArray());
+		}
         /// <summary>
         /// Get the API server time.
         /// </summary>
